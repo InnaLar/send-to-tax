@@ -97,7 +97,8 @@ class SendReceiptJobTest {
         when(shedlockRepository.findByName(anyString())).thenAnswer(invocation -> {
             bothInsideFindByName.countDown();
             releaseAll.await(); // ждём второй поток — воспроизводим гонку
-            return Optional.empty();
+            //return Optional.empty();
+            return Optional.of(Shedlock.builder().status(ShedlockStatus.READY_TO_WORK).build());
         });
         when(shedlockRepository.save(any(Shedlock.class))).thenAnswer(inv -> inv.getArgument(0));
 
