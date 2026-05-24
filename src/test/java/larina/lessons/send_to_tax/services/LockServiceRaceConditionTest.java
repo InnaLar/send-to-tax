@@ -1,20 +1,24 @@
 package larina.lessons.send_to_tax.services;
 
 import larina.lessons.send_to_tax.model.entity.Shedlock;
+import larina.lessons.send_to_tax.model.entity.ShedlockStatus;
 import larina.lessons.send_to_tax.repository.ShedlockRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.CountDownLatch;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * Воспроизводит race condition в LockService.lock():
@@ -26,49 +30,59 @@ import static org.mockito.Mockito.when;
  * FOR UPDATE в findByName помогает только когда запись УЖЕ существует.
  * При первом старте, когда записи нет, блокировать нечего — отсюда и гонка.
  */
+@Slf4j
+@SpringBootTest
+@Testcontainers
 class LockServiceRaceConditionTest {
+    @Autowired
+    private ShedlockRepository shedlockRepository;
+    @Autowired
+    private LockService lockService;
+    @Container
+    private static final PostgreSQLContainer<?> POSTGRESQL_CONTAINER = new PostgreSQLContainer<>("postgres:14.5");
+
+    @DynamicPropertySource
+    static void dataSource(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", POSTGRESQL_CONTAINER::getJdbcUrl);
+        registry.add("spring.datasource.username", POSTGRESQL_CONTAINER::getUsername);
+        registry.add("spring.datasource.password", POSTGRESQL_CONTAINER::getPassword);
+    }
+
+    @BeforeEach
+    void resetLock() {
+        Shedlock shedlock = shedlockRepository.findByName("processReceipt").orElseThrow();
+        shedlock.setStatus(ShedlockStatus.READY_TO_WORK);
+        shedlockRepository.save(shedlock);
+    }
 
     @Test
-    void twoThreadsBothAcquireLock_whenRowDoesNotExistYet() throws InterruptedException {
-        // Latch: обе нити вошли в findByName — теперь отпускаем их одновременно
-        CountDownLatch bothInsideFindByName = new CountDownLatch(2);
-        CountDownLatch releaseAll = new CountDownLatch(1);
+    void lockShouldFalseWhenLocked() throws InterruptedException {
+        var locked1 = lockService.lock("processReceipt");
+        var locked2 = lockService.lock("processReceipt");
+        assertThat(locked2).isFalse();
+    }
 
-        ShedlockRepository mockRepo = mock(ShedlockRepository.class);
-
-        // Имитируем состояние гонки: оба потока видят пустую таблицу
-        when(mockRepo.findByName(anyString())).thenAnswer(invocation -> {
-            bothInsideFindByName.countDown();   // сообщаем: я внутри findByName
-            releaseAll.await();                  // жду, пока второй поток тоже зайдёт
-            return Optional.empty();             // оба видят — записи нет
-        });
-        when(mockRepo.save(any(Shedlock.class)))
-                .thenAnswer(inv -> inv.getArgument(0));
-
-        LockService lockService = new LockService(mockRepo);
+    @Test
+    void secondThreadNotWorkWhenTwoThreadStartsSimultaneously() throws InterruptedException {
 
         List<Boolean> results = Collections.synchronizedList(new ArrayList<>());
 
-        Thread t1 = new Thread(() -> results.add(lockService.lock("send-receipt-job")));
-        Thread t2 = new Thread(() -> results.add(lockService.lock("send-receipt-job")));
+        Thread t1 = new Thread(() -> results.add(lockService.lock("processReceipt")));
+        Thread t2 = new Thread(() -> results.add(lockService.lock("processReceipt")));
 
         t1.start();
         t2.start();
-
-        // Ждём, пока оба потока окажутся внутри findByName, затем отпускаем
-        bothInsideFindByName.await();
-        releaseAll.countDown();
-
         t1.join();
         t2.join();
 
-        // Ожидаемое поведение: ровно один поток получил лок (false = "иди работай"),
-        // второй увидел занятый лок (true = "заблокирован").
-        // ПАДАЕТ — пока не пофикшен race condition:
-        // оба потока видят Optional.empty() до первого save и оба возвращают false.
-        assertThat(results)
-                .as("Один поток должен быть заблокирован (true), второй — работать (false). " +
-                    "Если оба false — race condition не пофикшен.")
-                .containsExactlyInAnyOrder(false, true);
+        assertThat(results).containsExactly(true, false);
+    }
+
+    @Test
+    void lockShouldTrueWhenReadyToWork() throws InterruptedException {
+        var locked1 = lockService.lock("processReceipt");
+        assertThat(locked1).isTrue();
+        ShedlockStatus status = shedlockRepository.findByName("processReceipt").orElseThrow().getStatus();
+        assertThat(status).isEqualTo(ShedlockStatus.IN_PROCESS);
     }
 }

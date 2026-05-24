@@ -26,7 +26,7 @@ public class SendReceiptJob {
     public void processReceipt() {
         try {
             log.info("Start receipts' processing");
-            if (!lockService.lock("processReceipt")) {
+            if (lockService.lock("processReceipt")) {
 
                 List<Receipt> receipts = repository.findAllByProcessedFalse(20);
                 for (Receipt receipt : receipts) {

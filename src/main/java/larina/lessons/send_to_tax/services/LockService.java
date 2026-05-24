@@ -20,10 +20,10 @@ public class LockService {
                 = shedlockRepository.findByName(name).orElseThrow();
 
         if (shedlock.getStatus().equals(ShedlockStatus.IN_PROCESS)) {
-            return true;
+            return false;
         } else {
             shedlock.setStatus(ShedlockStatus.IN_PROCESS);
-            return false;
+            return true;
         }
 
     }
