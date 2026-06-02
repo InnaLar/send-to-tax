@@ -34,3 +34,9 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect #  postgres
         format_sql: true # форматирует sql команды приложению
     open-in-view: false
+
+
+
+my:
+  task:
+    cron: "*/10 * * * * *"  # задача выполняется каждые 10 секунд
