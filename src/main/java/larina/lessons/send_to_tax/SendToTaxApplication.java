@@ -2,7 +2,6 @@ package larina.lessons.send_to_tax;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 
@@ -12,8 +11,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 public class SendToTaxApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(SendToTaxApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(SendToTaxApplication.class, args);
+    }
 
 }
