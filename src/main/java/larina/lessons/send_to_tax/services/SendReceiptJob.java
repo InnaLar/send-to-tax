@@ -2,6 +2,7 @@ package larina.lessons.send_to_tax.services;
 
 import larina.lessons.send_to_tax.clients.TaxClient;
 import larina.lessons.send_to_tax.model.entity.Receipt;
+import larina.lessons.send_to_tax.model.entity.ReceiptDeliveredStatus;
 import larina.lessons.send_to_tax.repository.ReceiptRepository;
 import larina.lessons.send_to_tax.repository.ShedlockRepository;
 import lombok.AllArgsConstructor;
@@ -20,14 +21,14 @@ public class SendReceiptJob {
     private final ShedlockRepository shedlockRepository;
     private final TaxClient taxClient;
     private final LockService lockService;
+    private final static int LIMIT_TRY = 3;
 
-    @Scheduled(cron = "${my.task.cron}")
+    @Scheduled(cron = "${my.send.cron}")
     public void processReceipt() {
 
         try {
             log.info("Start receipts' processing");
             if (lockService.lock("processReceipt")) {
-                int countTry = 0;
                 List<Receipt> receipts = repository.findAllByProcessedFalse(20);
                 while (!receipts.isEmpty()) {
 
@@ -38,14 +39,12 @@ public class SendReceiptJob {
                             repository.save(receipt);
                         } catch (Exception e) {
                             log.info("Request tax-service failed", e);
-                            countTry++;
-                        }
-                        finally {
-                            int limit_try = 3;
-                            if (countTry > limit_try) {
+                            receipt.setAttempts(receipt.getAttempts() + 1);
+                            if (receipt.getAttempts() >= LIMIT_TRY) {
                                 receipt.setProcessed(true);
-                                repository.save(receipt);
+                                receipt.setStatus(ReceiptDeliveredStatus.FAILED);
                             }
+                            repository.save(receipt);
                         }
                     }
                     receipts = repository.findAllByProcessedFalse(20);

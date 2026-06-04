@@ -8,6 +8,7 @@ import larina.lessons.send_to_tax.repository.ShedlockRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -16,6 +17,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest
+@ActiveProfiles("test")
 @Testcontainers
 public abstract class BaseTest {
     @Autowired
@@ -26,10 +28,10 @@ public abstract class BaseTest {
     protected ReceiptRepository receiptRepository;
     @Autowired
     protected SendReceiptJob sendReceiptJob;
+    @Autowired
+    protected ReceiptPopulationJob receiptPopulationJob;
     @MockitoBean
     protected TaxClient taxClient;
-    @MockitoBean
-    protected ReceiptPopulationJob receiptPopulationJob;
     @Container
     private static final PostgreSQLContainer<?> POSTGRESQL_CONTAINER = new PostgreSQLContainer<>("postgres:14.5");
 

@@ -29,7 +29,7 @@ class SendReceiptJobTesting {
     @Test
     void whenLockAlreadyHeld_noReceiptsSentToTax() {
         LockService lockService = mock(LockService.class);
-        when(lockService.lock(anyString())).thenReturn(true); // лок занят
+        when(lockService.lock(anyString())).thenReturn(false); // лок занят
 
         ReceiptRepository receiptRepository = mock(ReceiptRepository.class);
         ShedlockRepository shedlockRepository = mock(ShedlockRepository.class);
@@ -54,7 +54,7 @@ class SendReceiptJobTesting {
     @Test
     void whenLockAcquired_allUnprocessedReceiptsAreSentToTax() {
         LockService lockService = mock(LockService.class);
-        when(lockService.lock(anyString())).thenReturn(false); // лок получен
+        when(lockService.lock(anyString())).thenReturn(true); // лок получен
 
         Receipt r1 = Receipt.builder().id(1L).sum("100").processed(false).build();
         Receipt r2 = Receipt.builder().id(2L).sum("200").processed(false).build();
@@ -65,7 +65,7 @@ class SendReceiptJobTesting {
 
         ShedlockRepository shedlockRepository = mock(ShedlockRepository.class);
         when(shedlockRepository.findByName(anyString())).thenReturn(Optional.of(
-                Shedlock.builder().status(ShedlockStatus.IN_PROCESS).build()
+                Shedlock.builder().status(ShedlockStatus.READY_TO_WORK).build()
         ));
 
         TaxClient taxClient = mock(TaxClient.class);

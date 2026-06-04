@@ -7,10 +7,21 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 
 public interface ReceiptRepository extends JpaRepository<Receipt, Long> {
-    //@Lock(LockModeType.OPTIMISTIC_FORCE_INCREMENT)
     @Query(value = """
                 select * from receipts r
-                where r.processed = false limit :limit
+                where r.processed = false and COALESCE(r.status, '') <> 'FAILED' limit :limit
             """, nativeQuery = true)
     List<Receipt> findAllByProcessedFalse(int limit);
+
+    @Query(value = """
+                select * from receipts r
+                where r.processed = true limit :limit
+            """, nativeQuery = true)
+    List<Receipt> findAllByProcessedTrue(int limit);
+
+    @Query(value = """
+                select * from receipts r
+                where r.status = :status limit :limit
+            """, nativeQuery = true)
+    List<Receipt> findAllByStatus(String status, int limit);
 }

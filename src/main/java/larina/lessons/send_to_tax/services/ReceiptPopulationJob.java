@@ -19,7 +19,7 @@ public class ReceiptPopulationJob {
 
     private final ReceiptRepository repository;
 
-    @Scheduled(cron = "*/10 * * * * *")
+    @Scheduled(cron = "${my.population.cron}")
     public void processJob() {
         log.info("Start receipts populating");
         List<Receipt> receipts = new ArrayList<>();

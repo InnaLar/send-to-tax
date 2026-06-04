@@ -26,6 +26,11 @@ public class Receipt {
     @Column
     @Enumerated(EnumType.STRING)
     private ReceiptSource source;
+    @Column
+    @Enumerated(EnumType.STRING)
+    private ReceiptDeliveredStatus status;
+    @Column
+    private int attempts;
 
     @Override
     public final boolean equals(Object o) {
