@@ -11,4 +11,9 @@ public interface ShedlockRepository extends JpaRepository<Shedlock, Long> {
             select * from shedlock sh where sh.name = :name for update
             """, nativeQuery = true)
     Optional<Shedlock> findByName(String name);
+
+    @Query(value = """
+            select * from shedlock sh where sh.name = :name and sh.process_id = :processId
+            """, nativeQuery = true)
+    Optional<Shedlock> findByNameAndProcessId(String name, String processId);
 }

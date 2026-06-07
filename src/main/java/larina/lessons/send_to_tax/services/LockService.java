@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -27,26 +26,25 @@ public class LockService {
     }
 
     @Transactional
-    public boolean lock(String name) {
+    public boolean lock(String name, String processId) {
         Shedlock shedlock
                 = shedlockRepository.findByName(name).orElseThrow();
         if (shedlock.getStatus().equals(ShedlockStatus.IN_PROCESS)
-                && (Duration.between(shedlock.getStartTime(), Instant.now()).compareTo(Duration.ofMinutes(lockTimeout)) == -1)) {
+                && (Duration.between(shedlock.getStartTime(), Instant.now()).compareTo(Duration.ofMinutes(lockTimeout)) < 0)) {
             return false;
         } else {
             shedlock.setStatus(ShedlockStatus.IN_PROCESS);
             shedlock.setStartTime(Instant.now());
+            shedlock.setProcessId(processId);
+            shedlockRepository.save(shedlock);
             return true;
         }
 
     }
 
-    public void unlock(String name) {
-        Optional<Shedlock> byName = shedlockRepository.findByName(name);
-        if (byName.isEmpty()) {
-            return;
-        }
-        Shedlock shedlock = byName.get();
+    public void unlock(String name, String processId) {
+        Shedlock shedlock = shedlockRepository.findByNameAndProcessId(name, processId)
+                .orElseThrow(() -> new RuntimeException("Shedlock was locked by another process"));
         shedlock.setStatus(ShedlockStatus.READY_TO_WORK);
         shedlock.setStartTime(null);
         shedlockRepository.save(shedlock);

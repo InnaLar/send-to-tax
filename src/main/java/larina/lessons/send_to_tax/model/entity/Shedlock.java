@@ -23,4 +23,6 @@ public class Shedlock {
     @Column
     @Enumerated(EnumType.STRING)
     private ShedlockStatus status;
+    @Column(name = "process_id")
+    private String processId;
 }

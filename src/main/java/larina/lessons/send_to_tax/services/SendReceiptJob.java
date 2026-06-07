@@ -23,12 +23,12 @@ public class SendReceiptJob {
     private final LockService lockService;
     private final static int LIMIT_TRY = 3;
 
-    @Scheduled(cron = "${my.send.cron}")
+   /* @Scheduled(cron = "${my.send.cron}")*/
     public void processReceipt() {
-
+        String idProcess = Thread.currentThread().getName();
         try {
             log.info("Start receipts' processing");
-            if (lockService.lock("processReceipt")) {
+            if (lockService.lock("processReceipt", idProcess)) {
                 List<Receipt> receipts = repository.findAllByProcessedFalse(20);
                 while (!receipts.isEmpty()) {
 
@@ -54,7 +54,7 @@ public class SendReceiptJob {
                 log.info("method is running by other process");
             }
         } finally {
-            lockService.unlock("processReceipt");
+            lockService.unlock("processReceipt", idProcess);
         }
     }
 

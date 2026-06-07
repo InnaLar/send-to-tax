@@ -19,7 +19,7 @@ public class LockServiceTest extends BaseTest {
         shedlock.setStartTime(Instant.now().minus(35, ChronoUnit.MINUTES));
         shedlockRepository.save(shedlock);
         //When
-        boolean result = lockService.lock("processReceipt");
+        boolean result = lockService.lock("processReceipt", "testProcessId");
         //Then
         Assertions.assertThat(result).isTrue();
     }
@@ -33,7 +33,7 @@ public class LockServiceTest extends BaseTest {
         shedlock.setStartTime(Instant.now().minus(15, ChronoUnit.MINUTES));
         shedlockRepository.save(shedlock);
         //When
-        boolean result = lockService.lock("processReceipt");
+        boolean result = lockService.lock("processReceipt", "testProcessId");
         //Then
         Assertions.assertThat(result).isFalse();
     }

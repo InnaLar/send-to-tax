@@ -47,5 +47,6 @@ public abstract class BaseTest {
         Shedlock shedlock = shedlockRepository.findByName("processReceipt").orElseThrow();
         shedlock.setStatus(ShedlockStatus.READY_TO_WORK);
         shedlockRepository.save(shedlock);
+        receiptRepository.deleteAll();
     }
 }
