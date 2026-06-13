@@ -12,8 +12,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest
@@ -32,7 +30,8 @@ public abstract class BaseTest {
     protected ReceiptPopulationJob receiptPopulationJob;
     @MockitoBean
     protected TaxClient taxClient;
-    @Container
+
+    /*@Container
     private static final PostgreSQLContainer<?> POSTGRESQL_CONTAINER = new PostgreSQLContainer<>("postgres:14.5");
 
     @DynamicPropertySource
@@ -40,6 +39,14 @@ public abstract class BaseTest {
         registry.add("spring.datasource.url", POSTGRESQL_CONTAINER::getJdbcUrl);
         registry.add("spring.datasource.username", POSTGRESQL_CONTAINER::getUsername);
         registry.add("spring.datasource.password", POSTGRESQL_CONTAINER::getPassword);
+    }*/
+
+    @DynamicPropertySource
+    static void dataSource(DynamicPropertyRegistry registry) {
+        // Берем данные из ОДНОГО запущенного контейнера
+        registry.add("spring.datasource.url", PostgresInitializer.POSTGRES_CONTAINER::getJdbcUrl);
+        registry.add("spring.datasource.username", PostgresInitializer.POSTGRES_CONTAINER::getUsername);
+        registry.add("spring.datasource.password", PostgresInitializer.POSTGRES_CONTAINER::getPassword);
     }
 
     @BeforeEach

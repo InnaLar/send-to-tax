@@ -43,3 +43,6 @@ my:
   population:
     cron: "*/10 * * * * *"  # задача выполняется каждые 10 секунд
   lock_timeout: 30 # таймаут блокировки в минутах
+
+tfk:
+  base-url: "http://localhost:8080"

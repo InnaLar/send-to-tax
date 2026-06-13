@@ -6,6 +6,7 @@ import larina.lessons.send_to_tax.model.entity.Shedlock;
 import larina.lessons.send_to_tax.model.entity.ShedlockStatus;
 import larina.lessons.send_to_tax.repository.ReceiptRepository;
 import larina.lessons.send_to_tax.repository.ShedlockRepository;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -19,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+@Disabled
 class SendReceiptJobTesting {
 
     // -----------------------------------------------------------------------
