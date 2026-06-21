@@ -4,7 +4,6 @@ import larina.lessons.send_to_tax.clients.TaxClient;
 import larina.lessons.send_to_tax.model.entity.Receipt;
 import larina.lessons.send_to_tax.model.entity.ReceiptStatus;
 import larina.lessons.send_to_tax.repository.ReceiptRepository;
-import larina.lessons.send_to_tax.repository.ShedlockRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,7 +20,7 @@ public class SendReceiptJob {
     private final LockService lockService;
     private final static int LIMIT_TRY = 3;
 
-   /* @Scheduled(cron = "${my.send.cron}")*/
+    /* @Scheduled(cron = "${my.send.cron}")*/
     public void processReceipt() {
         String idProcess = Thread.currentThread().getName();
         try {
