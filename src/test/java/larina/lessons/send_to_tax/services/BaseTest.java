@@ -29,8 +29,6 @@ public abstract class BaseTest {
     protected ReceiptRepository receiptRepository;
     @Autowired
     protected SendReceiptJob sendReceiptJob;
-    @Autowired
-    protected ReceiptPopulationJob receiptPopulationJob;
     @MockitoBean
     protected TaxClient taxClient;
     @Autowired

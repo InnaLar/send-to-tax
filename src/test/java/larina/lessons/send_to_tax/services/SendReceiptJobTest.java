@@ -30,7 +30,7 @@ public class SendReceiptJobTest extends BaseTest {
         //THEN
         List<Receipt> receipts = receiptRepository.findAll();
         Assertions.assertThat(receipts).hasSize(60);
-        Assertions.assertThat(receipts).allMatch(receipt -> receipt.isProcessed());
+        Assertions.assertThat(receipts).allMatch(Receipt::isProcessed);
         Mockito.verify(taxClient, Mockito.times(60)).sendReceipt(any(), any());
     }
 

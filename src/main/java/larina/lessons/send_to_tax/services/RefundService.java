@@ -18,7 +18,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class RefundService {
     private final RefundRepository refundRepository;
-    private final ReceiptService receiptService;
     private final ReceiptRepository receiptRepository;
     private final OutboxRepository outboxRepository;
     private final TfkClient tfkClient;
@@ -32,13 +31,12 @@ public class RefundService {
         if (receipt.getStatus().equals(ReceiptStatus.REFUNDED)) {
             throw new ServiceException(ErrorCode.ERR_CODE_003, receipt.getId());
         }
-        saveRefundAndOutbox(receiptById);
-        sendCallAndProcessingOutbox(receiptById);
+        saveRefundAndOutbox(receipt);
+        sendCallAndProcessingOutbox(receipt);
     }
 
     @Transactional
-    private void sendCallAndProcessingOutbox(Optional<Receipt> receiptById) {
-        Receipt receipt = receiptById.orElseThrow();
+    private void sendCallAndProcessingOutbox(Receipt receipt) {
         Optional<Refund> refundOptional = refundRepository.findByReceiptId(receipt.getId());
         if (refundOptional.isEmpty()) {
             throw new ServiceException(ErrorCode.ERR_CODE_002, receipt.getId());
@@ -62,14 +60,12 @@ public class RefundService {
     }
 
     @Transactional
-    private void saveRefundAndOutbox(Optional<Receipt> receiptById) {
-        Receipt receipt = receiptById.orElseThrow();
+    private void saveRefundAndOutbox(Receipt receipt) {
         Refund refund = Refund.builder()
                 .receipt(receipt)
                 .createdAt(LocalDateTime.now())
-                //.status(RefundStatus.NEW)
                 .build();
-        Refund refundSaved = refundRepository.save(refund);
+        refundRepository.save(refund);
         Outbox outbox = Outbox.builder()
                 .receiptId(receipt.getId())
                 .status(SendStatus.NEW)

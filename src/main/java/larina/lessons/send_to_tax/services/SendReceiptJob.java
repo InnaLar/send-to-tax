@@ -17,7 +17,6 @@ import java.util.List;
 public class SendReceiptJob {
 
     private final ReceiptRepository repository;
-    private final ShedlockRepository shedlockRepository;
     private final TaxClient taxClient;
     private final LockService lockService;
     private final static int LIMIT_TRY = 3;

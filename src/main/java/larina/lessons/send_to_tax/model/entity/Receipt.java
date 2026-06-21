@@ -8,17 +8,12 @@ import org.hibernate.proxy.HibernateProxy;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-//@Builder
 @SuperBuilder
 @Getter
 @Setter
 @ToString
 @Table(name = "receipts")
 public class Receipt extends BaseEntity {
-    /*@Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column
-    private Long id;*/
     @Column
     private boolean processed;
     @Column
