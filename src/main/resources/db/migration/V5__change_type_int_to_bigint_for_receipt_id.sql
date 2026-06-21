@@ -1,0 +1,1 @@
+ALTER TABLE refunds ALTER COLUMN receipt_id TYPE BIGINT;

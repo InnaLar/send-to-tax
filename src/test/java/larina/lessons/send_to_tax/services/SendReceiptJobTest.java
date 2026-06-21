@@ -1,9 +1,7 @@
 package larina.lessons.send_to_tax.services;
 
 import larina.lessons.send_to_tax.model.entity.Receipt;
-import larina.lessons.send_to_tax.model.entity.ReceiptDeliveredStatus;
-import larina.lessons.send_to_tax.model.entity.Shedlock;
-import larina.lessons.send_to_tax.model.entity.ShedlockStatus;
+import larina.lessons.send_to_tax.model.entity.ReceiptStatus;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -57,8 +55,8 @@ public class SendReceiptJobTest extends BaseTest {
         sendReceiptJob.processReceipt();
         //THEN
         Assertions.assertThat(receiptRepository.findAllByProcessedTrue(5)).hasSize(3);
-        Assertions.assertThat(receiptRepository.findAllByStatus(ReceiptDeliveredStatus.FAILED.toString(), 5)).hasSize(1);
-        Assertions.assertThat(receiptRepository.findAllByStatus(ReceiptDeliveredStatus.FAILED.toString(), 5))
+        Assertions.assertThat(receiptRepository.findAllByStatus(ReceiptStatus.FAILED.toString(), 5)).hasSize(1);
+        Assertions.assertThat(receiptRepository.findAllByStatus(ReceiptStatus.FAILED.toString(), 5))
                 .hasSize(1).first().extracting(Receipt::getAttempts).isEqualTo(3);
         Mockito.verify(taxClient, Mockito.times(5)).sendReceipt(any(), any());
     }

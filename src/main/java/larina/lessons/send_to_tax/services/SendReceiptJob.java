@@ -2,12 +2,11 @@ package larina.lessons.send_to_tax.services;
 
 import larina.lessons.send_to_tax.clients.TaxClient;
 import larina.lessons.send_to_tax.model.entity.Receipt;
-import larina.lessons.send_to_tax.model.entity.ReceiptDeliveredStatus;
+import larina.lessons.send_to_tax.model.entity.ReceiptStatus;
 import larina.lessons.send_to_tax.repository.ReceiptRepository;
 import larina.lessons.send_to_tax.repository.ShedlockRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -42,7 +41,7 @@ public class SendReceiptJob {
                             receipt.setAttempts(receipt.getAttempts() + 1);
                             if (receipt.getAttempts() >= LIMIT_TRY) {
                                 receipt.setProcessed(true);
-                                receipt.setStatus(ReceiptDeliveredStatus.FAILED);
+                                receipt.setStatus(ReceiptStatus.FAILED);
                             }
                             repository.save(receipt);
                         }

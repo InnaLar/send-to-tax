@@ -2,23 +2,23 @@ package larina.lessons.send_to_tax.model.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.hibernate.proxy.HibernateProxy;
-
-import java.util.Objects;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
+//@Builder
+@SuperBuilder
 @Getter
 @Setter
 @ToString
 @Table(name = "receipts")
-public class Receipt {
-    @Id
+public class Receipt extends BaseEntity {
+    /*@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column
-    private Long id;
+    private Long id;*/
     @Column
     private boolean processed;
     @Column
@@ -28,11 +28,11 @@ public class Receipt {
     private ReceiptSource source;
     @Column
     @Enumerated(EnumType.STRING)
-    private ReceiptDeliveredStatus status;
+    private ReceiptStatus status;
     @Column
     private int attempts;
 
-    @Override
+    /*@Override
     public final boolean equals(Object o) {
         if (this == o) return true;
         if (o == null) return false;
@@ -41,7 +41,7 @@ public class Receipt {
         if (thisEffectiveClass != oEffectiveClass) return false;
         Receipt receipt = (Receipt) o;
         return getId() != null && Objects.equals(getId(), receipt.getId());
-    }
+    }*/
 
     @Override
     public final int hashCode() {
